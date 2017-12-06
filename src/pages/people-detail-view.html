@@ -1,0 +1,323 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-icons/maps-icons.html">
+
+
+
+<dom-module id="people-detail-view">
+  <template>
+    <style>
+       :host {
+        display: block;
+        padding: 16px;
+      }
+
+
+      h1 {
+        text-align: center;
+      }
+
+      .main-card {
+        width: 100%;
+        height: 100%;
+        background: #424242;
+
+
+        --paper-card-content: {
+          text-align: center;
+          color: #dddddd;
+        }
+        --paper-card-header-image: {
+          width: 250px;
+          margin: auto;
+          margin-top: 20px;
+        }
+
+        --paper-card-actions: {
+          padding: 20px;
+          text-align: center;
+          height: 100%;
+          color: #f1f1f1;
+        }
+      }
+
+
+      .object-card {
+        background: #424242;
+        margin: 20px;
+
+        --paper-card-content: {
+          text-align: center;
+          color: #dddddd;
+        }
+        --paper-card-header-image: {
+          width: 200px;
+          padding-left: 35px;
+          padding-right: 35px;
+          margin: auto;
+          margin-top: 20px;
+        }
+
+        --paper-card-actions: {
+          text-align: center;
+          height: 60px;
+        }
+      }
+
+      paper-button.indigo {
+        margin-top: 6px;
+        background-color: var(--paper-green-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        }
+        ;
+      }
+
+
+      .card-header {
+        font-weight: bold;
+        font-size: 1.3em;
+      }
+
+      .people-detail {
+        width: 90%;
+        display: grid;
+        grid-template-columns: 30% 70%;
+        grid-gap: 0.5em;
+
+        height: 100%;
+        padding: 50px;
+        background: #C7C7C7;
+        box-shadow: 3px 3px 15px grey;
+        margin: auto;
+      }
+
+      .detail-info {
+        text-align: center;
+        background: #424242;
+      }
+
+      .detail-work {
+        text-align: center;
+        width: 100%;
+        height: 100%
+      }
+
+
+      @media only screen and (max-width: 1200px) {
+        .detail-info {
+          grid-column: 1/3;
+        }
+        .detail-work {
+          grid-column: 1/3;
+        }
+      }
+    </style>
+
+
+
+
+    <iron-ajax auto url="https://swapi.co/api/people/{{currentid}}" handle-as="json" on-response="getPersonDetail">
+    </iron-ajax>
+
+    <template is="dom-if" if="[[isPersonShowed]]">
+
+
+      <template is="dom-repeat" items="{{starshipsId}}" as="idS">
+        <iron-ajax auto url="https://swapi.co/api/starships/{{idS}}" handle-as="json" on-response="getStarship">
+        </iron-ajax>
+      </template>
+    </template>
+
+
+    <h1>Details de {{personDetail.name}}</h1>
+
+
+
+    <div class="people-detail">
+      <div class="detail-info">
+        <paper-card class="main-card" image="../images/{{personDetail.gender}}.png">
+          <div class="card-content">
+            <div class="card-header">
+              <h3> {{personDetail.name}}</h3>
+            </div>
+          </div>
+          <div class="card-actions">
+            <div class="horizontal justified">
+              <h4>Sexe : </strong>{{personDetail.gender}}</h4>
+              <h4>Date de naissance : {{personDetail.birth_year}}</h4>
+              <h4>Poids : {{personDetail.mass}}</h4>
+              <h4>Taille : {{personDetail.height}}</h4>
+              <h4>Couleur des cheuveux : {{personDetail.hair_color}}</h4>
+              <h4>Couleur de la peau : {{personDetail.skin_color}}</h4>
+              <h4>Couleur des yeux : {{personDetail.eye_color}}</h4>
+            </div>
+          </div>
+        </paper-card>
+      </div>
+      <div class="detail-work">
+        <h2>Liste des Films:</h2>
+        <template is="dom-repeat" items="{{films}}" as="film">
+
+          <paper-card class="object-card" image="../images/sw_film.png">
+            <div class="card-content">
+              <div class="card-header">
+                [[film.title]]
+              </div>
+            </div>
+            <div class="card-actions">
+              <div class="horizontal justified">
+                <paper-button raised class="indigo" on-click="openDetailFilm">détails</paper-button>
+              </div>
+            </div>
+          </paper-card>
+        </template>
+
+        <h2>Liste des StarShips:</h2>
+
+        <template is="dom-repeat" items="{{starships}}" as="starship">
+
+          <paper-card class="object-card" image="../images/sw_starship.png">
+            <div class="card-content">
+              <div class="card-header">
+                [[starship.name]]
+              </div>
+            </div>
+            <div class="card-actions">
+              <div class="horizontal justified">
+                <paper-button raised class="indigo" on-click="openDetailStarship">détails</paper-button>
+              </div>
+            </div>
+          </paper-card>
+        </template>
+      </div>
+    </div>
+
+
+  </template>
+  <script>
+    class PeopleDetailView extends Polymer.Element {
+      static get is() { return 'people-detail-view'; }
+
+      constructor() {
+        super();
+
+        this.isRefreshed = false;
+
+        this.isPersonShowed = false;
+        this.filmsCount = 0;
+        this.starshipsCount = 0;
+
+        this.films = [];
+        this.filmsLink = [];
+        this.cptF = 0;
+
+        this.starships = [];
+        this.starshipsId = [];
+        this.starshipsLink = [];
+        this.cptS = 0;
+      }
+
+      ready() {
+        super.ready();
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      disconnectedCallback() {
+        super.disconnectedCallback();
+      }
+
+      getPersonDetail(res) {
+        this.films = [];
+        this.filmsLink = [];
+        this.cptF = 0;
+        this.isPersonShowed = false;
+
+        if (res.detail.response.gender == "n/a")
+          res.detail.response.gender = "robot";
+
+        this.personDetail = res.detail.response;
+
+        this.filmsLink = res.detail.response.films;
+
+        this.getFilms();
+
+        this.starshipsId = [];
+        this.starshipsLink = [];
+        this.cptS = 0;
+
+        this.starshipsLink = res.detail.response.starships;
+        this.starshipsLink.forEach(function (url) {
+          let id = this.getid(url);
+          this.starshipsId.push(id);
+        }, this);
+
+        this.set('starshipsId', this.starshipsId.slice());
+        this.starshipsCount = this.starshipsId.length;
+
+        this.starships = [];
+
+        this.isPersonShowed = true;
+      }
+
+      getFilms() {
+        this.filmsLink.forEach(function (url) {
+          fetch(url)
+            .then(reponse => {
+              if (reponse.ok) {
+                return reponse.json();
+              }
+              throw new Error('Network response was not ok.');
+            })
+            .then(data => {
+              this.films.push(data);
+              this.set('films', this.films.slice());
+            })
+            .catch(error => console.log('Problem : ' + error));
+        }, this);
+      }
+
+      getStarship(res) {
+        this.cptS++;
+        let starship = res.detail.response;
+        this.starships.push(starship);
+
+        if (this.starshipsCount == this.cptS) {
+          this.set('starships', this.starships.slice());
+          this.cptS = 0;
+        }
+      }
+
+      getid(url) {
+        let str = url.substr(0, url.length - 1);
+        return str.substr(str.lastIndexOf('/') + 1);
+      }
+
+      onError() {
+      }
+
+      openDetailStarship(oEvent) {
+        let id = this.getid(oEvent.model.get('starship.url'));
+        window.history.pushState({}, null, '/starship-detail/' + id);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+      }
+
+
+      openDetailFilm(oEvent) {
+        let id = this.getid(oEvent.model.get('film.url'));
+        window.history.pushState({}, null, '/film-detail/' + id);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+      }
+    }
+    customElements.define(PeopleDetailView.is, PeopleDetailView);
+  </script>
+
+
+</dom-module>

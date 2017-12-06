@@ -1,0 +1,202 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+
+
+<dom-module id="people-list-view">
+  <template>
+    <style>
+       :host {
+        display: block;
+        padding: 16px;
+      }
+
+      h1,
+      h3 {
+        text-align: center;
+      }
+
+      paper-card {
+        background: #424242;
+        margin: 20px;
+
+        --paper-card-content: {
+          text-align: center;
+          color: #dddddd;
+        }
+        --paper-card-header-image: {
+          width: 250px;
+          margin: auto;
+          margin-top: 20px;
+        }
+
+        --paper-card-actions: {
+          text-align: center;
+          height: 60px;
+        }
+      }
+
+      paper-button.indigo {
+        margin-top: 6px;
+        background-color: var(--paper-green-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        }
+        ;
+      }
+
+      paper-button.pinkselected {
+        margin-top: 6px;
+        background-color: var(--paper-pink-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        }
+        ;
+      }
+
+      paper-button.pink {
+        color: var(--paper-pink-a200);
+      }
+
+      .card-header {
+        font-weight: bold;
+        font-size: 1.3em;
+      }
+
+      .people-list {
+        width: 100%;
+        text-align: center;
+      }
+
+      .page-list {
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+
+
+
+    <iron-ajax auto url="https://swapi.co/api/people/?search={{newText}}" handle-as="json" on-response="getPeople">
+    </iron-ajax>
+
+    <template is="dom-repeat" items="{{pages}}" as="currentPage">
+      <iron-ajax auto url="https://swapi.co/api/people/?search={{txtRech}}&page={{currentPage}}" handle-as="json" on-response="getMorePeople">
+      </iron-ajax>
+    </template>
+
+
+    <h1>Liste des personnages</h1>
+
+    <paper-input always-float-label label="Rechercher un personnage par son nom: " on-input="onTextChange" value="{{newText}}"></paper-input>
+
+    <div class="people-list">
+      <template is="dom-repeat" items="{{people}}" as="item">
+
+        <paper-card image="../images/{{item.gender}}.png">
+          <div class="card-content">
+            <div class="card-header">
+              [[item.name]]
+            </div>
+          </div>
+          <div class="card-actions">
+            <div class="horizontal justified">
+              <paper-button raised class="indigo" on-click="openDetail">détails</paper-button>
+            </div>
+          </div>
+        </paper-card>
+
+      </template>
+    </div>
+
+
+
+
+  </template>
+  <script>
+    class PeopleListView extends Polymer.Element {
+      static get is() { return 'people-list-view'; }
+
+
+      constructor() {
+        super();
+        this.pageCount = 0;
+        this.people = [];
+        this.pages = [];
+        this.txtRech = "";
+      }
+
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      attributeChangedCallback() {
+        super.attributeChangedCallback();
+      }
+
+
+
+      getPeople(res) {
+        this.people = res.detail.response.results;
+        this.people.map(item => { if (item.gender == "n/a") item.gender = "robot"; });
+        this.pageCount = Math.ceil(res.detail.response.count / 10);
+        this.getOtherPages();
+      }
+
+      getOtherPages() {
+        if (this.pageCount > 1) {
+          for (let i = 2; i <= this.pageCount; i++)
+            this.pages.push(i);
+
+          this.set('pages', this.pages.slice());
+
+          //Lunch the search
+          this.txtRech = this.newText;
+        }
+      }
+
+      getMorePeople(res) {
+        res.detail.response.results.forEach(function (element) {
+          if (element.gender == "n/a")
+            element.gender = "robot";
+          this.people.push(element);
+        }, this);
+        this.set('people', this.people.slice());
+      }
+
+
+
+
+      openDetail(oEvent) {
+        let id = this.getid(oEvent.model.get('item.url'));
+        window.history.pushState({}, null, '/people-detail/' + id);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+      }
+
+
+      getid(url) {
+        let str = url.substr(0, url.length - 1);
+        return str.substr(str.lastIndexOf('/') + 1);
+      }
+
+      onTextChange() {
+        //suppression des anciens iron-ajax(s) pour éviter l'erreur 404 jusqu'à la reception de la premier reponse dans getPeople()
+        this.pages = [];
+      }
+
+
+    }
+    customElements.define(PeopleListView.is, PeopleListView);
+  </script>
+
+
+</dom-module>

@@ -1,0 +1,140 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/iron-icons/maps-icons.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+
+
+
+<dom-module id="film-list-view">
+  <template>
+    <style>
+       :host {
+        display: block;
+        padding: 16px;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      paper-card {
+        background: #424242;
+        margin: 20px;
+
+        --paper-card-content: {
+          text-align: center;
+          color: #dddddd;
+        }
+        --paper-card-header-image: {
+          width: 200px;
+          padding-left: 35px;
+          padding-right: 35px;
+          margin: auto;
+          margin-top: 20px;
+        }
+
+        --paper-card-actions: {
+          text-align: center;
+          height: 60px;
+        }
+      }
+
+      paper-button.indigo {
+        margin-top: 6px;
+        background-color: var(--paper-green-500);
+        color: white;
+        --paper-button-raised-keyboard-focus: {
+          background-color: var(--paper-pink-a200) !important;
+          color: white !important;
+        }
+        ;
+      }
+
+      .card-header {
+        font-weight: bold;
+        font-size: 1.3em;
+      }
+
+      .film-list {
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+
+
+    <iron-ajax auto url="https://swapi.co/api/films?search={{newText}}" handle-as="json" on-response="getFilm">
+    </iron-ajax>
+
+
+
+    <h1>Liste des films</h1>
+
+
+    <paper-input always-float-label label="Rechercher un film par son titre: " on-input="onTextChange" value="{{newText}}"></paper-input>
+
+    <div class="film-list">
+      <template is="dom-repeat" items="{{films}}">
+
+        <paper-card image="../images/sw_film.png">
+          <div class="card-content">
+            <div class="card-header">
+              [[item.title]]
+            </div>
+          </div>
+          <div class="card-actions">
+            <div class="horizontal justified">
+              <paper-button raised class="indigo" on-click="openDetail">détails</paper-button>
+            </div>
+          </div>
+        </paper-card>
+      </template>
+    </div>
+
+
+  </template>
+  <script>
+    class FilmListView extends Polymer.Element {
+      static get is() { return 'film-list-view'; }
+
+      constructor() {
+        super();
+        this.films = [];
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+      }
+
+      attributeChangedCallback() {
+        super.attributeChangedCallback();
+      }
+
+
+      getFilm(res) {
+        this.films = res.detail.response.results;
+      }
+
+
+      openDetail(oEvent) {
+        let id = this.getid(oEvent.model.get('item.url'));
+        window.history.pushState({}, null, '/film-detail/' + id);
+        window.dispatchEvent(new CustomEvent('location-changed'));
+      }
+
+      getid(url) {
+        let str = url.substr(0, url.length - 1);
+        return str.substr(str.lastIndexOf('/') + 1);
+      }
+
+      onTextChange(){
+
+      }
+
+    }
+    customElements.define(FilmListView.is, FilmListView);
+  </script>
+
+
+</dom-module>
