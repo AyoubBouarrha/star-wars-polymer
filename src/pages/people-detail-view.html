@@ -66,16 +66,20 @@
         }
       }
 
-      paper-button.indigo {
+      paper-button.polymer-blue {
         margin-top: 6px;
-        background-color: var(--paper-green-500);
-        color: white;
-        --paper-button-raised-keyboard-focus: {
-          background-color: var(--paper-pink-a200) !important;
-          color: white !important;
-        }
-        ;
+        background-color: var(--paper-light-blue-700);
+        color:#f1f1f1;
+        font-weight: bold;
       }
+
+      paper-button.polymer-pink {
+        margin-top: 6px;
+        background-color: var(--paper-pink-500);
+        color:#f1f1f1;
+        font-weight: bold;
+      }
+
 
 
       .card-header {
@@ -171,7 +175,7 @@
             </div>
             <div class="card-actions">
               <div class="horizontal justified">
-                <paper-button raised class="indigo" on-click="openDetailFilm">détails</paper-button>
+                <paper-button raised class="polymer-pink" on-click="openDetailFilm">détails</paper-button>
               </div>
             </div>
           </paper-card>
@@ -189,7 +193,7 @@
             </div>
             <div class="card-actions">
               <div class="horizontal justified">
-                <paper-button raised class="indigo" on-click="openDetailStarship">détails</paper-button>
+                <paper-button raised class="polymer-blue" on-click="openDetailStarship">détails</paper-button>
               </div>
             </div>
           </paper-card>

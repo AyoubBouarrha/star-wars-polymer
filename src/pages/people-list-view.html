@@ -41,32 +41,14 @@
         }
       }
 
-      paper-button.indigo {
-        margin-top: 6px;
-        background-color: var(--paper-green-500);
-        color: white;
-        --paper-button-raised-keyboard-focus: {
-          background-color: var(--paper-pink-a200) !important;
-          color: white !important;
-        }
-        ;
-      }
-
-      paper-button.pinkselected {
+      paper-button.polymer-pink {
         margin-top: 6px;
         background-color: var(--paper-pink-500);
-        color: white;
-        --paper-button-raised-keyboard-focus: {
-          background-color: var(--paper-pink-a200) !important;
-          color: white !important;
-        }
-        ;
+        color:#f1f1f1;
+        font-weight: bold;
       }
 
-      paper-button.pink {
-        color: var(--paper-pink-a200);
-      }
-
+    
       .card-header {
         font-weight: bold;
         font-size: 1.3em;
@@ -96,7 +78,7 @@
 
     <h1>Liste des personnages</h1>
 
-    <paper-input always-float-label label="Rechercher un personnage par son nom: " on-input="onTextChange" value="{{newText}}"></paper-input>
+    <paper-input  always-float-label label="Rechercher un personnage par son nom: " on-input="onTextChange" value="{{newText}}"></paper-input>
 
     <div class="people-list">
       <template is="dom-repeat" items="{{people}}" as="item">
@@ -109,7 +91,7 @@
           </div>
           <div class="card-actions">
             <div class="horizontal justified">
-              <paper-button raised class="indigo" on-click="openDetail">détails</paper-button>
+              <paper-button raised class="polymer-pink" on-click="openDetail">détails</paper-button>
             </div>
           </div>
         </paper-card>
